@@ -103,7 +103,7 @@ You can break up your functionality using any features that a CFC can provide.
 
 ### Scheduling the Task
 
-From within your application, you can schedule this task whenever it needs to be fun:
+From within your application, you can schedule this task whenever it needs to be run:
 
 ```javascript
 scheduleTask(handler="SomeExpensiveApiTask", params=SerializeJson({ id=widget.key() }));
