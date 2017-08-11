@@ -69,6 +69,8 @@ In production-like environments, set up a scheduled task or CRON job to run `/ta
 you prefer. (I recommend every 10 seconds if the user will need to wait in some way for this processing to
 complete.)
 
+Every time the `/tasks` URL is hit, the next available highest-priority task will be run.
+
 ## Usage
 
 Using the plugin is fairly straightforward. You create a CFC containing the logic for your background task
