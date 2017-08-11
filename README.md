@@ -82,20 +82,20 @@ Create a new CFC in the `tasks` folder of your application, extending either you
 ```javascript
 // tasks/SomeExpensiveApiTask.cfc
 component extends="Base" {
-	/**
-	 * This is the "entry point" for processing this background task.
-	 */
-	function perform() {
-		// All functionality available within a normal CFWheels controller is available from the
-		// `this.controller` property.
-		//
-		// You also have the opportunity to pass in a struct of `params` when you schedule this task.
-		local.widget = this.controller.model("widget").findByKey(params.id);
+  /**
+   * This is the "entry point" for processing this background task.
+   */
+  function perform() {
+    // All functionality available within a normal CFWheels controller is available from the
+    // `this.controller` property.
+    //
+    // You also have the opportunity to pass in a struct of `params` when you schedule this task.
+    local.widget = this.controller.model("widget").findByKey(params.id);
 
-		// This is just custom logic below. It can be whatever you need.
-		local.myApi = CreateObject("component", "lib.SomeApiWrapper").init(application.SOME_API_KEY);
-		local.myApi.someExpensiveMethod(title=local.widget.title, price=local.widget.price);
-	}
+    // This is just custom logic below. It can be whatever you need.
+    local.myApi = CreateObject("component", "lib.SomeApiWrapper").init(application.SOME_API_KEY);
+    local.myApi.someExpensiveMethod(title=local.widget.title, price=local.widget.price);
+  }
 }
 ```
 
@@ -130,12 +130,40 @@ JSON object containing params to use within the task.
  * @runAt When to run the task.
  */
 boolean function scheduleTask(
-	required string handler,
-	string params = "{}",
-	numeric priority = 0,
-	date runAt = Now()
+  required string handler,
+  string params = "{}",
+  numeric priority = 0,
+  date runAt = Now()
 )
 ```
+
+## Configuration
+
+I recommend tweaking these settings in `config/settings.cfm` if you need to.
+
+### `application.backgroundTasks.MAX_LOCK_LENGTH`
+
+`[integer]` default `300`
+
+Tasks are locked while being processed. This sets the number of seconds that should pass before a task
+is considered "unlocked" and can be tried again.
+
+### `application.backgroundTasks.MAX_NUM_CONCURRENT_TASKS`
+
+`[integer]` default `1`
+
+Number of tasks that can be run concurrently. Be careful about not setting this past the number of
+threads that your CFML engine can process. (Hint: CF Standard limits this.)
+
+The default value of `1` is safest as only one task can be processed at once.
+
+### `application.backgroundTasks.MAX_ERRORS`
+
+`[integer]` default `25`
+
+Maximum number of times that a task can error out before the queue considers it "failed" and stops
+trying to run it. (These particular tasks will be left behind in your database so you can investigate
+them.)
 
 ## Building the plugin release
 
@@ -145,8 +173,6 @@ Follow these steps:
 2.  Run `sh build.sh`
 
 The zip file should appear containing a releaseable CFWheels plugin named `BackgroundTasks-[VERSION].zip`.
-
-### Configuration
 
 ## License
 
