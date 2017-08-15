@@ -14,7 +14,7 @@ minutes. This is useful if your application integrates with an unreliable API. (
 
 ## Installation
 
-First, place the `BackgroundTasks-0.1.zip` file from this repository's Releases tab in your application's
+First, place the `BackgroundTasks-0.1.1.zip` file from this repository's Releases tab in your application's
 `plugins` folder, then reload the app.
 
 Next, there are a few other points of configuration in your database, application, and scheduled tasks.
