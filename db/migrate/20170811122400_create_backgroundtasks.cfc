@@ -2,7 +2,7 @@
 	<cffunction name="up" output="false">
 		<cfscript>
 			t = createTable(name="backgroundtasks");
-			t.integer(columnNames="priority,attempts", null=false);
+			t.integer(columnNames="priority,attempts", null=false, default=0);
 			t.text(columnNames="handler", null=false);
 			t.text("params,lasterror");
 			t.timestamp(columnNames="runat", null=false);
