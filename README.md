@@ -159,7 +159,7 @@ threads that your CFML engine can process. (Hint: CF Standard limits this.)
 
 The default value of `1` is safest as only one task can be processed at once.
 
-### `application.backgroundTasks.MAX_ERRORS`
+### `application.backgroundTasks.MAX_NUM_ERRORS`
 
 `[integer]` default `25`
 

@@ -10,7 +10,7 @@
 			this.runAt = DateAdd("n", 5, Now());
 			this.lockedAt = "";
 
-			if (this.attempts == application.backgroundTasks.MAX_ERRORS) {
+			if (this.attempts == application.backgroundTasks.MAX_NUM_ERRORS) {
 				this.failedAt = Now();
 			}
 

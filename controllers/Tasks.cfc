@@ -2,7 +2,7 @@
 	<cfparam name="application.backgroundTasks.activeTasks" type="array" default="#ArrayNew(1)#">
 	<cfparam name="application.backgroundTasks.MAX_LOCK_LENGTH" type="integer" default="300">
 	<cfparam name="application.backgroundTasks.MAX_NUM_CONCURRENT_TASKS" type="integer" default="1">
-	<cfparam name="application.backgroundTasks.MAX_ERRORS" type="integer" default="25">
+	<cfparam name="application.backgroundTasks.MAX_NUM_ERRORS" type="integer" default="25">
 
 	<cffunction name="update" output="false">
 		<cfset var loc = {}>
