@@ -167,6 +167,13 @@ Maximum number of times that a task can error out before the queue considers it 
 trying to run it. (These particular tasks will be left behind in your database so you can investigate
 them.)
 
+### `application.backgroundTasks.RUN_IN_THREADS`
+
+`[boolean]` default `true`
+
+Whether or not to run background tasks within separate threads. It's useful to turn this off if you
+need to debug a task by dumping values to the browser, etc.
+
 ## Building the plugin release
 
 Follow these steps:

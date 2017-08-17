@@ -3,15 +3,18 @@
 	<cfparam name="application.backgroundTasks.MAX_LOCK_LENGTH" type="integer" default="300">
 	<cfparam name="application.backgroundTasks.MAX_NUM_CONCURRENT_TASKS" type="integer" default="1">
 	<cfparam name="application.backgroundTasks.MAX_NUM_ERRORS" type="integer" default="25">
+	<cfparam name="application.backgroundTasks.RUN_IN_THREADS" type="boolean" default="true">
 
 	<cffunction name="update" output="false">
 		<cfset var loc = {}>
+		<cfset loc.unlockedAt = DateAdd("n", application.backgroundTasks.MAX_LOCK_LENGTH * -1, Now())>
+		<cfset loc.maxConcurrentTasks = application.backgroundTasks.MAX_NUM_CONCURRENT_TASKS>
+		<cfset loc.runInThreads = application.backgroundTasks.RUN_IN_THREADS>
+
 		<cfset $purgeExpiredActiveTasks()>
 
 		<cflock name="backgroundTasks" type="readonly" timeout="5">
-			<cfset loc.unlockedAt = DateAdd("n", application.backgroundTasks.MAX_LOCK_LENGTH * -1, Now())>
 			<cfset loc.numActiveTasks = ArrayLen(application.backgroundTasks.activeTasks)>
-			<cfset loc.maxConcurrentTasks = application.backgroundTasks.MAX_NUM_CONCURRENT_TASKS>
 		</cflock>
 
 		<cfif loc.numActiveTasks gte loc.maxConcurrentTasks>
@@ -32,39 +35,13 @@
 			<cfset taskIdentifier = CreateUuid()>
 			<cfset task.update(lockedAt=Now())>
 
-			<cfthread name="processBackgroundTask-#taskIdentifier#" action="run">
-				<cfset params = IsJson(task.params) ? DeserializeJSON(task.params) : StructNew()>
-
-				<cflock name="backgroundTasks" timeout="5" type="exclusive">
-					<cfscript>
-						if (ArrayLen(application.backgroundTasks.activeTasks) < application.backgroundTasks.MAX_NUM_CONCURRENT_TASKS) {
-							ArrayAppend(application.backgroundTasks.activeTasks, {
-								id=taskIdentifier,
-								startedAt=Now()
-							});
-						}
-					</cfscript>
-				</cflock>
-
-				<cftry>
-					<cfset backgroundTask = CreateObject("component", "tasks.#task.handler#").init(
-						id=taskIdentifier,
-						controller=this,
-						params=params
-					)>
-
-					<cfset backgroundTask.perform()>
-
-					<cfcatch type="any">
-						<cfset task.logError(cfcatch)>
-						<cfset $purgeActiveTask(taskIdentifier)>
-						<cfabort>
-					</cfcatch>
-				</cftry>
-
-				<cfset task.delete()>
-				<cfset $purgeActiveTask(taskIdentifier)>
-			</cfthread>
+			<cfif loc.runInThreads>
+				<cfthread name="processBackgroundTask-#taskIdentifier#" action="run">
+					<cfset $processBackgroundTask()>
+				</cfthread>
+			<cfelse>
+				<cfset $processBackgroundTask()>
+			</cfif>
 		</cfif>
 
 		<cfset renderNothing()>
@@ -83,6 +60,41 @@
 				}
 			</cfscript>
 		</cflock>
+	</cffunction>
+
+	<cffunction name="$processBackgroundTask" access="private" hint="Processes background task loaded in private `tasks` instance variable." output="false">
+		<cfset var loc = {}>
+		<cfset loc.params = IsJson(task.params) ? DeserializeJSON(task.params) : StructNew()>
+
+		<cflock name="backgroundTasks" timeout="5" type="exclusive">
+			<cfscript>
+				if (ArrayLen(application.backgroundTasks.activeTasks) < application.backgroundTasks.MAX_NUM_CONCURRENT_TASKS) {
+					ArrayAppend(application.backgroundTasks.activeTasks, {
+						id=taskIdentifier,
+						startedAt=Now()
+					});
+				}
+			</cfscript>
+		</cflock>
+
+		<cftry>
+			<cfset backgroundTask = CreateObject("component", "tasks.#task.handler#").init(
+				id=taskIdentifier,
+				controller=this,
+				params=loc.params
+			)>
+
+			<cfset backgroundTask.perform()>
+
+			<cfcatch type="any">
+				<cfset task.logError(cfcatch)>
+				<cfset $purgeActiveTask(taskIdentifier)>
+				<cfabort>
+			</cfcatch>
+		</cftry>
+
+		<cfset task.delete()>
+		<cfset $purgeActiveTask(taskIdentifier)>
 	</cffunction>
 
 	<cffunction name="$purgeExpiredActiveTasks" access="private" hint="Purges active tasks that have expired." output="false">
