@@ -1,0 +1,22 @@
+{
+    "name":"CFWheels Background Tasks",
+    "version":"0.2.0",
+    "author":"Chris Peters",
+    "location":"liquifusion/cfwheels-background-tasks#v0.2.0",
+    "directory":"/plugins/",
+    "createPackageDirectory":true,
+    "packageDirectory":"BackgroundTasks",
+    "slug":"cfwheels-backgroundtasks",
+    "type":"cfwheels-plugins",
+    "homepage":"https://github.com/liquifusion/cfwheels-background-tasks",
+    "shortDescription":"Database-based asynchronous priority queue system for CFWheels apps",
+    "keywords":"asynchronous",
+    "private":false,
+    "scripts":{
+        "postVersion":"package set location='liquifusion/cfwheels-background-tasks#v`package version`'",
+        "postPublish":"!git push --follow-tags",
+        "patch-release":"bump --patch && publish",
+        "minor-release":"bump --minor && publish",
+        "major-release":"bump --major && publish"
+    }
+}
